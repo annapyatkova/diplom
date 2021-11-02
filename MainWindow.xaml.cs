@@ -23,7 +23,7 @@ namespace Craft
     public partial class MainWindow : Window
     {
         DBCraftefoldContext db;
-        /**/
+        
         List<OrderModif> Mod = new List<OrderModif>(1);
         List<OrderModif> UpMod = new List<OrderModif>(1);
         List<PaintCol> Col = new List<PaintCol>(1);
@@ -64,85 +64,7 @@ namespace Craft
                 MessageBox.Show("Отсутствует соединение с базой данных!");
             }
 
-            /*
-             
-            try
-            {
-            }  
-            catch (Npgsql.PostgresException)
-            {
-                MessageBox.Show("Отсутствует соединение с базой данных!");
-            }
-
-            */
-
-
-            /*
-            То что мне открылось
-
-            //данные из одной таблицы
-            //ordersGrid.ItemsSource = db.Orders.Local.ToBindingList();
-
-
-            //Первый способ
-            var users = from o in db.Orders
-                        join p in db.Products on o.IdProduct equals p.IdProduct
-                        select new { IdOrder = o.IdOrder, Name = p.Name, Orderdate = o.Orderdate };
-
             
-            ordersGrid.ItemsSource = users.ToList();
-
-
-            //Второй способ
-            var users = db.Orders.Join(db.Products, // второй набор
-                o => o.IdProduct, // свойство-селектор объекта из первого набора
-                p => p.IdProduct, // свойство-селектор объекта из второго набора
-                (o, p) => new // результат
-                {
-                    IdOrder = o.IdOrder,
-                    Name = p.Name,
-                    Orderdate = o.Orderdate
-                });
-            ordersGrid.ItemsSource = users.ToList();*/
-
-            /*var orders = from o in db.Orders 
-                         join p in db.Products on o.IdProduct equals p.IdProduct
-                         join c in db.Categories on p.IdCategory equals c.IdCategory
-                         //orderby o.Orderdate descending /* не уверена в этой строке, но прога работает пока таблица не заполнена 
-                         select new { IdOrder = o.IdOrder, Name = p.Name, Orderdate = o.Orderdate, IdStage = o.IdStage, Nameofcategory = c.Nameofcategory };
-            ordersGrid.ItemsSource = orders.ToList();*/
-
-
-
-
-
-            /*var category = from c in db.Categories
-                           select c.Nameofcategory;
-            categoryList.ItemsSource = category.ToList();*/
-
-            /*  <Window.Resources>
-                    <local:Categories x:Key="Categorie" />
-                </Window.Resources>
-
-                DataContext="{StaticResource Categorie}">
-                <ComboBox Text="{Binding Path=Nameofcategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            */
-
-
-
-
-
-
-
-
-
-            /*string t = categoryList.Text;
-            var products = from c in db.Categories
-                           where c.Nameofcategory == t
-                           select c.IdCategory;
-            productsList.ItemsSource = t;*/
-
-
             this.Closing += MainWindow_Closing;
         }
 
@@ -181,12 +103,12 @@ namespace Craft
 
         ////////
         ////////
-        //////// Заполняем комбобоксы и датагриды данными
+        //////// Заполняем все таблицы данными
         ////////
         ///////
 
 
-        /*заполняет таблицы все*/
+        
         private void UpdateData()
         {
             //ordersGrid.Items.SortDescriptions.Clear();
@@ -204,7 +126,6 @@ namespace Craft
             OrdermodList();
 
             /*вторая вкладка*/
-            /*заполняем дата гриды*/
             ProductGrid();
             CategoriyList();
             PaintprodList();
@@ -220,7 +141,6 @@ namespace Craft
             ProductPhotoGrid();
 
             /*третья вкладка*/
-            /*заполняем дата гриды*/
             DispatchGrid();
             OrderList();
             DatapaintGrid();
@@ -278,8 +198,8 @@ namespace Craft
             ComboBox cmbx = sender as ComboBox;
             string nameofstage = cmbx.SelectedValue.ToString();
 
-                /*находим айди этапа */
-                var idstage = (from s in db.Stages
+            /*находим id этапа */
+            var idstage = (from s in db.Stages
                                where s.Stagename == nameofstage
                                select s.IdStage).FirstOrDefault();
 
@@ -289,16 +209,16 @@ namespace Craft
                     /*пока в таблице есть данные*/
                     for (int i = 0; i < ordersGrid.SelectedItems.Count; i++)
                     {
-                        /*считываем первый столбец выбранной строки, в этом случае это айдишник заказа*/
-                        var id = new DataGridCellInfo(ordersGrid.SelectedItems[i], ordersGrid.Columns[0]);
+                    /*считываем первый столбец выбранной строки, в этом случае это id заказа*/
+                    var id = new DataGridCellInfo(ordersGrid.SelectedItems[i], ordersGrid.Columns[0]);
                         /*делаем эту штуку текстом*/
                         var content = id.Column.GetCellContent(id.Item) as TextBlock;
                         /*если ячейка не пустая*/
                         int j;
                         if (content != null)
                         {
-                            /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
-                            bool success = int.TryParse(content.Text.Trim(), out j);
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
+                        bool success = int.TryParse(content.Text.Trim(), out j);
                             if (success)
                             {
 
@@ -322,7 +242,7 @@ namespace Craft
 
         }
 
-        /*заполняет комбобокс с категориями в форме добавления заказа*/
+        /*заполняет категории в форме добавления заказа*/
         private void Categorie()
         {
             var category = from c in db.Categories
@@ -330,15 +250,15 @@ namespace Craft
             categoryList.ItemsSource = category.ToList();
         }
 
-        /*вытаскивает название категории из комбобокса в добавлении заказа и заполянет следующий комбобокс подходящими товарами*/
+        /*вытаскивает название категории из заказа и заполянет подходящими товарами*/
         private void CategoryList_Selected(object sender, SelectionChangedEventArgs e)
         {
-            /*считывает название категории из комбобокса*/
+            /*считывает название категории*/
             var id = db.Orders.Select(u => u.IdOrder).FirstOrDefault();
             if (id != 0)
                 id = db.Orders.Max(u => u.IdOrder);
             string nameofcategory = categoryList.SelectedValue.ToString();
-            /*находим товары по категории и передаем в комбобокс*/
+            /*находим товары по категории*/
             var name = from c in db.Categories
                        join p in db.Products on c.IdCategory equals p.IdCategory
                        where c.Nameofcategory == nameofcategory
@@ -350,7 +270,7 @@ namespace Craft
 
         
 
-        /*вытаскивает название изделия из комбобокса в форме добавления заказа и заполняет комбобокс с покраской*/
+        /*вытаскивает название изделия в форме добавления заказа и заполняет покраску*/
         private void ProductsList_Selected(object sender, SelectionChangedEventArgs e)
         {
             if (productsList.SelectedValue != null) {
@@ -365,7 +285,7 @@ namespace Craft
         }
 
 
-        /*заполняет комбобокс с размерами в форме добавления заказа*/
+        /*заполняет размеры в форме добавления заказа*/
         private void SizeList()
         {
             var size = from c in db.Sizes
@@ -375,7 +295,7 @@ namespace Craft
 
 
 
-        /*заполняет комбобокс с магазинаим в форме добавления заказа*/
+        /*заполняет магазины в форме добавления заказа*/
         private void ShopList()
         {
             var shop = from c in db.Shops
@@ -385,7 +305,7 @@ namespace Craft
 
         
 
-        /*заполняет комбобокс с этапами в форме добавления заказа*/
+        /*заполняет этапы в форме добавления заказа*/
         private void StageList()
         {
             var stage = from c in db.Stages
@@ -394,7 +314,7 @@ namespace Craft
             stageList.ItemsSource = stage.ToList();
         }
 
-        /*попытка реализовать добавление фото в заказ*/
+        /*добавление фото в заказ*/
         private void Orderphoto()
         {
             var id = db.Orderphotos.Select(u => u.IdOrder).FirstOrDefault();
@@ -407,7 +327,7 @@ namespace Craft
                                           select c).ToList();
         }
 
-        /*заполняет комбобокс с модификациями в форме добавления заказа*/
+        /*заполняет модификации в форме добавления заказа*/
         private void OrdermodList()
         {
             var mod = from c in db.Modifications
@@ -429,7 +349,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < ordersGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник заказа*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id заказа*/
                     var id = new DataGridCellInfo(ordersGrid.SelectedItems[i], ordersGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -437,18 +357,18 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим список модификаций по данному заказу и пихаем его в ресурсы*/
+                            /*находим список модификаций по данному заказу и отправляем его в ресурсы*/
                             var mod = (from o in db.Ordermodifications
                                       join m in db.Modifications on o.IdModification equals m.IdModification
                                       where o.IdOrder == j
                                       select new { Modificationname = m.Modificationname }).ToList();
                             Resources["allmodList"] = mod;
 
-                            /*находим список фотографий по данному заказу и пихаем его в ресурсы*/
+                            /*находим список фотографий по данному заказу*/
                             var photo = (from o in db.Orderphotos
                                        where o.IdOrder == j
                                        select new { Title = o.Title, Orderphoto = o.Orderphoto }).ToList();
@@ -470,7 +390,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < ordersGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник заказа*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id заказа*/
                     var id = new DataGridCellInfo(ordersGrid.SelectedItems[i], ordersGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -478,23 +398,16 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-
-                           /* var category = (from o in db.Orders
-                                         join p in db.Products on o.IdProduct equals p.IdProduct
-                                         join c in db.Categories on p.IdCategory equals c.IdCategory
-                                         where o.IdOrder == j
-                                         select c.Nameofcategory).FirstOrDefault();
-                            upCategoryList.Text = category.ToString();*/
 
                             var product = (from o in db.Orders
                                            join p in db.Products on o.IdProduct equals p.IdProduct
                                            where o.IdOrder == j
                                            select p.Name).FirstOrDefault().ToString();
-                            /*upProductList.Text = product.ToString();*/
+                           
 
                             
                             var paint = (from o in db.Orders
@@ -504,7 +417,7 @@ namespace Craft
                             upPaintingList.SelectedValue = null;
                             upPaintingList.SelectedValue = paint;
 
-                            /*находим список модификаций по данному заказу и пихаем его в ресурсы*/
+                            /*находим список модификаций по данному заказу*/
                             var painting = (from pp in db.Paintingproduct
                                             join p in db.Products on pp.IdProduct equals p.IdProduct
                                             join pc in db.Painting on pp.IdPainting equals pc.IdPainting
@@ -522,11 +435,7 @@ namespace Craft
                                        select c.Size;
                             Resources["upSizeList"] = sizeList.ToList();
 
-                            /*var shop = (from o in db.Orders
-                                       join s in db.Shops on o.IdShop equals s.IdShop
-                                       where o.IdOrder == j
-                                       select s.Nameofshop).FirstOrDefault();
-                            upShopList.Text = shop.ToString();*/
+                            
 
                             var cost = (from o in db.Orders
                                         where o.IdOrder == j
@@ -543,7 +452,7 @@ namespace Craft
                                             select o.Specification).FirstOrDefault();
                             upSpecific.Text = specific.ToString();
 
-                            /*находим список модификаций по данному заказу и пихаем его в ресурсы*/
+                            /*находим список модификаций по данному заказу*/
                             var mod = (from o in db.Ordermodifications
                                        join m in db.Modifications on o.IdModification equals m.IdModification
                                        where o.IdOrder == j
@@ -565,17 +474,8 @@ namespace Craft
                             upOrdermodList.ItemsSource = addmod;
 
 
-                            /*
-                            var id = db.Orderphotos.Select(u => u.IdOrder).FirstOrDefault();
-                            if (id != 0)
-                                id = db.Orderphotos.Max(u => u.IdOrder);
-                            id++;
-
-                            orderphotosGrid.ItemsSource = (from c in db.Orderphotos
-                                                           where c.IdOrder == id
-                                                           select c).ToList();
-                            */
-                            /*находим список фотографий по данному заказу и пихаем его в ресурсы*/
+                            
+                            /*находим список фотографий по данному заказу */
                             var photo = (from o in db.Orderphotos
                                          where o.IdOrder == j
                                          select o).ToList();
@@ -599,7 +499,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < productGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник */
+                    /*считываем первый столбец выбранной строки, в этом случае это id */
                     var id = new DataGridCellInfo(productGrid.SelectedItems[i], productGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -607,18 +507,18 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим список  и пихаем его в ресурсы*/
+                            /*находим список */
                             var paint = (from o in db.Paintingproduct
                                        join m in db.Painting on o.IdPainting equals m.IdPainting
                                          where o.IdProduct == j
                                        select new { Paintingname = m.Paintingname }).ToList();
                             Resources["allpaintprodList"] = paint;
 
-                            /*находим список фотографий по данному и пихаем его в ресурсы*/
+                            /*находим список фотографий по данному */
                             var photo = (from o in db.Productphotos
                                          join m in db.Photos on o.IdProductphoto equals m.IdProductphoto
                                          where o.IdProduct == j
@@ -640,7 +540,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < productGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник товара*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id товара*/
                     var id = new DataGridCellInfo(productGrid.SelectedItems[i], productGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -648,7 +548,7 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
@@ -666,7 +566,7 @@ namespace Craft
 
 
 
-                            /*находим список покрасок по данному товару и пихаем его в ресурсы*/
+                            /*находим список покрасок по данному товару */
                             var paint = (from o in db.Paintingproduct
                                        join m in db.Painting on o.IdPainting equals m.IdPainting
                                        where o.IdProduct == j
@@ -688,7 +588,7 @@ namespace Craft
 
                            
 
-                            /*находим список фотографий по данному товару и пихаем его в ресурсы*/
+                            /*находим список фотографий по данному товару*/
                             var photo = (from o in db.Productphotos
                                          join m in db.Photos on o.IdProductphoto equals m.IdProductphoto
                                          where o.IdProduct == j
@@ -711,7 +611,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < paintGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник */
+                    /*считываем первый столбец выбранной строки, в этом случае это id */
                     var id = new DataGridCellInfo(paintGrid.SelectedItems[i], paintGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -719,11 +619,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим список  и пихаем его в ресурсы*/
+                            /*находим список */
                             var color = (from o in db.Paintcolors
                                          join m in db.Colors on o.IdColor equals m.IdColor
                                          where o.IdPainting == j
@@ -745,7 +645,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < paintGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник покраски*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id покраски*/
                     var id = new DataGridCellInfo(paintGrid.SelectedItems[i], paintGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -753,7 +653,7 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
@@ -798,7 +698,7 @@ namespace Craft
             productGrid.ItemsSource = products.ToList();
         }
 
-        /*заполняет комбобокс с категориями в форме добавления изделия во второй вкладке*/
+        /*заполняет категории в форме добавления изделия во второй вкладке*/
         private void CategoriyList()
         {
             var category = from c in db.Categories
@@ -806,7 +706,7 @@ namespace Craft
             categoryProductList.ItemsSource = category.ToList();
         }
 
-        /*заполняет комбобокс с покрасками в форме добавления заказа*/
+        /*заполняет покраску в форме добавления заказа*/
         private void PaintprodList()
         {
             var prod = from c in db.Painting
@@ -817,7 +717,7 @@ namespace Craft
         /*добавление фото в изделие*/
         private void Productphoto()
         {
-            /*ищем максимальный айди фотографии*/
+            /*ищем максимальный id фотографии*/
             var id = db.Photos.Select(u => u.IdProductphoto).FirstOrDefault();
             if (id != 0)
                 id = db.Photos.Max(u => u.IdProductphoto);
@@ -828,19 +728,19 @@ namespace Craft
                                              select c).ToList();
         }
 
-        /*выводит категории в дата грид на второй вкладке*/
+        /*выводит категории на второй вкладке*/
         private void CategoryGrid()
         {
             categoryGrid.ItemsSource = db.Categories.Local.ToBindingList();
         }
 
-        /*выводит магазины в дата грид на второй вкладке*/
+        /*выводит магазины */
         private void ShopsGrid()
         {
             shopsGrid.ItemsSource = db.Shops.Local.ToBindingList();
         }
 
-        /*выводит этапы в дата грид на второй вкладке*/
+        /*выводит этапы */
         private void StagesGrid()
         {
             stagesGrid.ItemsSource = db.Stages.Local.ToBindingList();
@@ -848,25 +748,25 @@ namespace Craft
             
         }
 
-        /*выводит размеры в дата грид на второй вкладке*/
+        /*выводит размеры*/
         private void SizesGrid()
         {
             sizesGrid.ItemsSource = db.Sizes.Local.ToBindingList();
         }
 
-        /*выводит модификации в дата грид на второй вкладке*/
+        /*выводит модификации*/
         private void ModGrid()
         {
             modGrid.ItemsSource = db.Modifications.Local.ToBindingList();
         }
 
-        /*выводит покраску в дата грид на второй вкладке*/
+        /*выводит покраску*/
         private void PaintGrid()
         {
             paintGrid.ItemsSource = db.Painting.Local.ToBindingList();
         }
 
-        /*заполняет комбобокс с цветами в форме добавления покраски*/
+        /*заполняет комбобокс*/
         private void PaintcolorList()
         {
             var color = from c in db.Colors
@@ -874,29 +774,26 @@ namespace Craft
             paintcolorList.ItemsSource = color.ToList();
         }
 
-        /*выводит цвет в дата грид на второй вкладке*/
+        /*выводит цвет */
         private void ColorGrid()
         {
             colorGrid.ItemsSource = db.Colors.Local.ToBindingList();
         }
 
-        /*выводит фотогорафии изделий в дата грид на второй вкладке*/
+        /*выводит фотогорафии изделий */
         private void ProductPhotoGrid()
         {
             productphotoGrid.ItemsSource = db.Photos.Local.ToBindingList();
         }
 
 
-
-        
-
-        /*выводит отправки в дата грид на третьей вкладке*/
+        /*выводит отправки*/
         private void DispatchGrid()
         {
             dispatchGrid.ItemsSource = db.Dispatch.Local.ToBindingList();
         }
 
-        /*заполняет комбобокс с заказами в форме добавления отправки в третьей вкладке*/
+        /*заполняет заказы в форме добавления отправки в третьей вкладке*/
         private void OrderList()
         {
             var order = from o in db.Orders
@@ -904,10 +801,6 @@ namespace Craft
                         select o.IdOrder;
             numberorderdispatch.ItemsSource = order.ToList();
 
-            /*dispatchGrid.ItemsSource = (from d in db.Dispatch
-                                        join o in db.Orders on d.IdOrder equals o.IdOrder
-                                        where o.IdStage != 6
-                                        select d).ToList();*/
         }
 
         /*заполняет таблицу статистики в третьей вкладке*/
@@ -1010,19 +903,15 @@ namespace Craft
             {
 
             
-            /*Orders order = new Orders { IdCategory = i, Nameofcategory = FruitTextBox.Text };
-            db.Orders.Add(order);
-            db.SaveChanges();
-            Categorie();
-            i++;*/
-            /*находим в таблице максимальный айдишник заказа и увеличиваем на 1, чтобы добавить в таблицу новый заказ*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
+          
+            /*находим в таблице максимальный id заказа и увеличиваем на 1, чтобы добавить в таблицу новый заказ*/
+            /*если там ничего нет, то просто берем id единичку*/
             var id = db.Orders.Select(u => u.IdOrder).FirstOrDefault();
             if (id != 0)
                 id = db.Orders.Max(u => u.IdOrder);
             id++;
 
-            /*вытаскиваем из формы добавления заказа заполненные поля и ищем в базе их айдишники*/
+            /*вытаскиваем из формы добавления заказа заполненные поля и ищем в базе их id*/
             if (productsList.SelectedValue != null && paintingList.SelectedValue != null && stageList.SelectedValue != null && shopList.SelectedValue != null && sizeList.SelectedValue != null)
             {
                 try
@@ -1064,7 +953,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int i = 0; i < (ordermodGrid.Items.Count); i++)
                                 {
-                                    /*считываем название и переделываем в текстблок*/
+                                    /*считываем название и переделываем */
                                     var mod = new DataGridCellInfo(ordermodGrid.Items[i], ordermodGrid.Columns[0]);
                                     var modcontent = mod.Column.GetCellContent(mod.Item) as TextBlock;
                                     var idmod = from m in db.Modifications
@@ -1083,7 +972,7 @@ namespace Craft
                             /*считаем сколько их*/
                             if (orderphotosGrid.Items.Count > 0)
                             {
-                                /*считаем максимальный айди фотографии заказов*/
+                                /*считаем максимальный id фотографии заказов*/
                                 var idphoto = db.Orderphotos.Select(u => u.IdOrderphoto).FirstOrDefault();
                                 if (idphoto != 0)
                                     idphoto = db.Orderphotos.Max(u => u.IdOrderphoto);
@@ -1091,7 +980,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int i = 0; i < (orderphotosGrid.Items.Count) - 1; i++)
                                 {
-                                    /*считываем название и ссылку и переделываем в текстблок*/
+                                    /*считываем название и ссылку и переделываем*/
                                     var title = new DataGridCellInfo(orderphotosGrid.Items[i], orderphotosGrid.Columns[0]);
                                     var orderphoto = new DataGridCellInfo(orderphotosGrid.Items[i], orderphotosGrid.Columns[1]);
                                     var titlecontent = title.Column.GetCellContent(title.Item) as TextBlock;
@@ -1155,7 +1044,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < ordersGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник заказа*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id заказа*/
                     var id = new DataGridCellInfo(ordersGrid.SelectedItems[i], ordersGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -1163,11 +1052,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*вытаскиваем из формы добавления заказа заполненные поля и ищем в базе их айдишники*/
+                            /*вытаскиваем из формы добавления заказа заполненные поля и ищем в базе их id*/
                             string paint = upPaintingList.SelectedValue.ToString();
                             var idpaint = (from c in db.Painting
                                 where c.Paintingname == paint
@@ -1184,7 +1073,7 @@ namespace Craft
 
                             var specification = upSpecific.Text;
 
-                            /*находим нужный объект по айди и  обновляем*/
+                            /*находим нужный объект по id и  обновляем*/
                             Orders order = db.Orders.FirstOrDefault(c => c.IdOrder == j);
                             if (order != null)
                             {
@@ -1202,7 +1091,7 @@ namespace Craft
                             /*модификации*/
                             if (upOrdermodGrid.Items.Count > 0)
                             {
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var ordmod = (from om in db.Ordermodifications
                                               where om.IdOrder == j
                                               select om).ToList();
@@ -1215,7 +1104,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int k = 0; k < (upOrdermodGrid.Items.Count); k++)
                                 {
-                                    /*считываем название и переделываем в текстблок*/
+                                    /*считываем название и переделываем*/
                                     var mod = new DataGridCellInfo(upOrdermodGrid.Items[k], upOrdermodGrid.Columns[0]);
                                     var modcontent = mod.Column.GetCellContent(mod.Item) as TextBlock;
                                     var idmod = from m in db.Modifications
@@ -1235,7 +1124,7 @@ namespace Craft
                             }
                             else
                             {
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var ordmod = (from om in db.Ordermodifications
                                               where om.IdOrder == j
                                               select om).ToList();
@@ -1250,9 +1139,9 @@ namespace Craft
                             /*считаем сколько их*/
                             if (upOrderphotosGrid.Items.Count > 0)
                             {
-                                
 
-                                /*находим нужный объект по айди и удаляем*/
+
+                                /*находим нужный объект по id и удаляем*/
                                 var ordphoto = (from op in db.Orderphotos
                                                 where op.IdOrder == j
                                               select op).ToList();
@@ -1262,7 +1151,7 @@ namespace Craft
                                     db.SaveChanges();
                                 }
 
-                                //считаем максимальный айди фотографии заказов
+                                //считаем максимальный id фотографии заказов
                                 var idphoto = db.Orderphotos.Select(u => u.IdOrderphoto).FirstOrDefault();
                                 if (idphoto != 0)
                                     idphoto = db.Orderphotos.Max(u => u.IdOrderphoto);
@@ -1271,7 +1160,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int n = 0; n < (upOrderphotosGrid.Items.Count) - 1; n++)
                                 {
-                                    /*считываем название и ссылку и переделываем в текстблок*/
+                                    /*считываем название и ссылку и переделываем */
                                     var title = new DataGridCellInfo(upOrderphotosGrid.Items[n], upOrderphotosGrid.Columns[0]);
                                     var orderphoto = new DataGridCellInfo(upOrderphotosGrid.Items[n], upOrderphotosGrid.Columns[1]);
                                     var titlecontent = title.Column.GetCellContent(title.Item) as TextBlock;
@@ -1287,7 +1176,7 @@ namespace Craft
                             }
                             else
                             {
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var ordphoto = (from op in db.Orderphotos
                                                 where op.IdOrder == j
                                                 select op).ToList();
@@ -1305,8 +1194,7 @@ namespace Craft
                     }
                 }
             }
-            /*UpMod = null;
-            UpMod = new List<OrderModif>(1);*/
+            
         }
 
         /*добавляет в заказ модификацию*/
@@ -1352,16 +1240,16 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник изделия и увеличиваем на 1, чтобы добавить в таблицу новое изделие*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Products.Select(u => u.IdProduct).FirstOrDefault();
+
+                /*находим в таблице максимальный id изделия и увеличиваем на 1, чтобы добавить в таблицу новое изделие*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Products.Select(u => u.IdProduct).FirstOrDefault();
             if (id != 0)
                 id = db.Products.Max(u => u.IdProduct);
             id++;
-            /*вытаскиваем из формы добавления изделия заполненные поля и ищем в базе их айдишники*/
+                /*вытаскиваем из формы добавления изделия заполненные поля и ищем в базе их id*/
 
-            if (categoryProductList.SelectedValue != null)
+                if (categoryProductList.SelectedValue != null)
             {
 
                 /*создаем новый объект с введенными данными и добавляем его в базу в таблицу изделия и сохраняем изменения*/
@@ -1381,7 +1269,7 @@ namespace Craft
                             /*считаем сколько их*/
                             if (productphotosGrid.Items.Count > 0)
                             {
-                                /*считаем максимальный айди фотографии изделий*/
+                                /*считаем максимальный id фотографии изделий*/
                                 var idphoto = db.Photos.Select(u => u.IdProductphoto).FirstOrDefault();
                                 if (idphoto != 0)
                                     idphoto = db.Photos.Max(u => u.IdProductphoto);
@@ -1389,7 +1277,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int i = 0; i < (productphotosGrid.Items.Count) - 1; i++)
                                 {
-                                    /*считываем название и ссылку и переделываем в текстблок*/
+                                    /*считываем название и ссылку и переделываем*/
                                     var title = new DataGridCellInfo(productphotosGrid.Items[i], productphotosGrid.Columns[0]);
                                     var orderphoto = new DataGridCellInfo(productphotosGrid.Items[i], productphotosGrid.Columns[1]);
                                     var titlecontent = title.Column.GetCellContent(title.Item) as TextBlock;
@@ -1414,7 +1302,7 @@ namespace Craft
                                 for (int i = 0; i < (paintprodGrid.Items.Count); i++)
                                 {
 
-                                    /*считываем название и переделываем в текстблок*/
+                                    /*считываем название и переделываем */
                                     var prod = new DataGridCellInfo(paintprodGrid.Items[i], paintprodGrid.Columns[0]);
                                     var prodcontent = prod.Column.GetCellContent(prod.Item) as TextBlock;
                                     var idprod = from m in db.Painting
@@ -1506,7 +1394,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < productGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник товара*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id товара*/
                     var id = new DataGridCellInfo(productGrid.SelectedItems[i], productGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -1514,17 +1402,17 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*вытаскиваем из формы  заполненные поля и ищем в базе их айдишники*/
-                            
+                            /*вытаскиваем из формы  заполненные поля и ищем в базе их id*/
+
                             var price = Decimal.Parse(upPrice.Text);
 
                             var description = upDescription.Text;
 
-                            /*находим нужный объект по айди и  обновляем*/
+                            /*находим нужный объект по id и  обновляем*/
                             Products product = db.Products.FirstOrDefault(c => c.IdProduct == j);
                             if (product != null)
                             {
@@ -1537,7 +1425,7 @@ namespace Craft
                             /*покраски*/
                             if (upPaintprodGrid.Items.Count > 0)
                             {
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var paintprod = (from om in db.Paintingproduct
                                               where om.IdProduct == j
                                               select om).ToList();
@@ -1550,7 +1438,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int k = 0; k < (upPaintprodGrid.Items.Count); k++)
                                 {
-                                    /*считываем название и переделываем в текстблок*/
+                                    /*считываем название и переделываем*/
                                     var paint = new DataGridCellInfo(upPaintprodGrid.Items[k], upPaintprodGrid.Columns[0]);
                                     var paintcontent = paint.Column.GetCellContent(paint.Item) as TextBlock;
                                     var idpaint = from m in db.Painting
@@ -1568,7 +1456,7 @@ namespace Craft
                             }
                             else
                             {
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var paintprod = (from om in db.Paintingproduct
                                                  where om.IdProduct == j
                                                  select om).ToList();
@@ -1585,7 +1473,7 @@ namespace Craft
                             {
 
 
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var prodphoto = (from op in db.Productphotos
                                                 where op.IdProduct == j
                                                 select op).ToList();
@@ -1595,7 +1483,7 @@ namespace Craft
                                     db.SaveChanges();
                                 }
 
-                                //считаем максимальный айди фотографии товаров
+                                //считаем максимальный id фотографии товаров
                                 var idphoto = db.Photos.Select(u => u.IdProductphoto).FirstOrDefault();
                                 if (idphoto != 0)
                                     idphoto = db.Photos.Max(u => u.IdProductphoto);
@@ -1604,7 +1492,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int n = 0; n < (upProductphotosGrid.Items.Count) - 1; n++)
                                 {
-                                    /*считываем название и ссылку и переделываем в текстблок*/
+                                    /*считываем название и ссылку и переделываем*/
                                     var title = new DataGridCellInfo(upProductphotosGrid.Items[n], upProductphotosGrid.Columns[0]);
                                     var productphoto = new DataGridCellInfo(upProductphotosGrid.Items[n], upProductphotosGrid.Columns[1]);
                                     var titlecontent = title.Column.GetCellContent(title.Item) as TextBlock;
@@ -1623,7 +1511,7 @@ namespace Craft
                             }
                             else
                             {
-                                /*находим нужный объект по айди и удаляем*/
+                                /*находим нужный объект по id и удаляем*/
                                 var prodphoto = (from op in db.Productphotos
                                                  where op.IdProduct == j
                                                  select op).ToList();
@@ -1650,10 +1538,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник категории и увеличиваем на 1, чтобы добавить в таблицу новую*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Categories.Select(u => u.IdCategory).FirstOrDefault();
+
+                /*находим в таблице максимальный id категории и увеличиваем на 1, чтобы добавить в таблицу новую*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Categories.Select(u => u.IdCategory).FirstOrDefault();
             if (id != 0)
                 id = db.Categories.Max(u => u.IdCategory);
             id++;
@@ -1698,10 +1586,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник магазина и увеличиваем на 1, чтобы добавить в таблицу новый*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Shops.Select(u => u.IdShop).FirstOrDefault();
+
+                /*находим в таблице максимальный id магазина и увеличиваем на 1, чтобы добавить в таблицу новый*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Shops.Select(u => u.IdShop).FirstOrDefault();
             if (id != 0)
                 id = db.Shops.Max(u => u.IdShop);
             id++;
@@ -1753,10 +1641,10 @@ namespace Craft
         {
             try
             {
-           
-            /*находим в таблице максимальный айдишник этап и увеличиваем на 1, чтобы добавить в таблицу новый*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Stages.Select(u => u.IdStage).FirstOrDefault();
+
+                /*находим в таблице максимальный id этап и увеличиваем на 1, чтобы добавить в таблицу новый*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Stages.Select(u => u.IdStage).FirstOrDefault();
             if (id != 0)
                 id = db.Stages.Max(u => u.IdStage);
             id++;
@@ -1802,11 +1690,11 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник размера и увеличиваем на 1, чтобы добавить в таблицу новый*/
 
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Sizes.Select(u => u.IdSize).FirstOrDefault();
+                /*находим в таблице максимальный id размера и увеличиваем на 1, чтобы добавить в таблицу новый*/
+
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Sizes.Select(u => u.IdSize).FirstOrDefault();
             if (id != 0)
                 id = db.Sizes.Max(u => u.IdSize);
             id++;
@@ -1850,10 +1738,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник модификации и увеличиваем на 1, чтобы добавить в таблицу новую*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Modifications.Select(u => u.IdModification).FirstOrDefault();
+
+                /*находим в таблице максимальный id модификации и увеличиваем на 1, чтобы добавить в таблицу новую*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Modifications.Select(u => u.IdModification).FirstOrDefault();
             if (id != 0)
                 id = db.Modifications.Max(u => u.IdModification);
             id++;
@@ -1901,10 +1789,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник покраски и увеличиваем на 1, чтобы добавить в таблицу новую*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Painting.Select(u => u.IdPainting).FirstOrDefault();
+
+                /*находим в таблице максимальный id покраски и увеличиваем на 1, чтобы добавить в таблицу новую*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Painting.Select(u => u.IdPainting).FirstOrDefault();
             if (id != 0)
                 id = db.Painting.Max(u => u.IdPainting);
             id++;
@@ -1939,7 +1827,7 @@ namespace Craft
                 for (int i = 0; i < (paincolorGrid.Items.Count) ; i++)
                 {
 
-                    /*считываем название и переделываем в текстблок*/
+                    /*считываем название и переделываем */
                     var col = new DataGridCellInfo(paincolorGrid.Items[i], paincolorGrid.Columns[0]);
                     var colcontent = col.Column.GetCellContent(col.Item) as TextBlock;
                     var idcol = from m in db.Colors
@@ -2019,24 +1907,24 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < paintGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник покраски*/
-                    var id = new DataGridCellInfo(paintGrid.SelectedItems[i], paintGrid.Columns[0]);
+                        /*считываем первый столбец выбранной строки, в этом случае это id покраски*/
+                        var id = new DataGridCellInfo(paintGrid.SelectedItems[i], paintGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
                     /*если ячейка не пустая*/
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
-                        bool success = int.TryParse(content.Text.Trim(), out j);
+                            /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
+                            bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
                             
                             /*цвета*/
                             if (upPaintGrid.Items.Count > 0)
                             {
-                                /*находим нужный объект по айди и удаляем*/
-                                var paintcol = (from om in db.Paintcolors
+                                    /*находим нужный объект по id и удаляем*/
+                                    var paintcol = (from om in db.Paintcolors
                                                  where om.IdPainting == j
                                                  select om).ToList();
                                 foreach (Paintcolors o in paintcol)
@@ -2048,7 +1936,7 @@ namespace Craft
                                 /*для каждой строки таблицы*/
                                 for (int k = 0; k < (upPaintGrid.Items.Count); k++)
                                 {
-                                    /*считываем название и переделываем в текстблок*/
+                                    /*считываем название и переделываем */
                                     var color = new DataGridCellInfo(upPaintGrid.Items[k], upPaintGrid.Columns[0]);
                                     var colorcontent = color.Column.GetCellContent(color.Item) as TextBlock;
                                     var idcolor = from m in db.Colors
@@ -2066,8 +1954,8 @@ namespace Craft
                             }
                             else
                             {
-                                /*находим нужный объект по айди и удаляем*/
-                                var paintcol = (from om in db.Paintcolors
+                                    /*находим нужный объект по id и удаляем*/
+                                    var paintcol = (from om in db.Paintcolors
                                                 where om.IdPainting == j
                                                 select om).ToList();
                                 foreach (Paintcolors o in paintcol)
@@ -2104,10 +1992,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник цвета и увеличиваем на 1, чтобы добавить в таблицу новый*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Colors.Select(u => u.IdColor).FirstOrDefault();
+
+                /*находим в таблице максимальный id цвета и увеличиваем на 1, чтобы добавить в таблицу новый*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Colors.Select(u => u.IdColor).FirstOrDefault();
             if (id != 0)
                 id = db.Colors.Max(u => u.IdColor);
             id++;
@@ -2159,10 +2047,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник фотографии и увеличиваем на 1, чтобы добавить в таблицу новую*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Photos.Select(u => u.IdProductphoto).FirstOrDefault();
+
+                /*находим в таблице максимальный id фотографии и увеличиваем на 1, чтобы добавить в таблицу новую*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Photos.Select(u => u.IdProductphoto).FirstOrDefault();
             if (id != 0)
                 id = db.Photos.Max(u => u.IdProductphoto);
             id++;
@@ -2211,10 +2099,10 @@ namespace Craft
         {
             try
             {
-            
-            /*находим в таблице максимальный айдишник отправки и увеличиваем на 1, чтобы добавить в таблицу новую*/
-            /*если там ничего нет, то просто берем айдишник единичку*/
-            var id = db.Dispatch.Select(u => u.IdDispatch).FirstOrDefault();
+
+                /*находим в таблице максимальный id отправки и увеличиваем на 1, чтобы добавить в таблицу новую*/
+                /*если там ничего нет, то просто берем id единичку*/
+                var id = db.Dispatch.Select(u => u.IdDispatch).FirstOrDefault();
             if (id != 0)
                 id = db.Dispatch.Max(u => u.IdDispatch);
             id++;
@@ -2303,7 +2191,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < ordersGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник заказа*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id заказа*/
                     var id = new DataGridCellInfo(ordersGrid.SelectedItems[i], ordersGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2311,7 +2199,7 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
@@ -2330,7 +2218,7 @@ namespace Craft
                                 db.Ordermodifications.Remove(o);
                             }
 
-                            /*находим нужный заказ по айди и удаляем*/
+                            /*находим нужный заказ по id и удаляем*/
                             Orders order = db.Orders.FirstOrDefault(c => c.IdOrder == j);
                             if (order != null)
                             {
@@ -2421,7 +2309,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < productGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник изделия*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id изделия*/
                     var id = new DataGridCellInfo(productGrid.SelectedItems[i], productGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2429,7 +2317,7 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
@@ -2447,7 +2335,7 @@ namespace Craft
                                 db.Productphotos.Remove(c);
                             }
 
-                            /*находим нужное изделие по айди и удаляем*/
+                            /*находим нужное изделие по id и удаляем*/
                             Products product = db.Products.FirstOrDefault(c => c.IdProduct == j);
                             if (product != null)
                             {
@@ -2536,18 +2424,9 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < categoryGrid.SelectedItems.Count; i++)
                 {
-                    /*куски кода, которые частично работали*/
-                    /*var ci = new DataGridCellInfo(categoryGrid.SelectedItems[i], categoryGrid.Columns[1]);
-                    var content = ci.Column.GetCellContent(ci.Item) as TextBlock;
-                    MessageBox.Show(content.Text);*/
 
-                    /*Categories category = categoryGrid.SelectedItems[i] as Categories;
-                    if (category != null)
-                    {
-                        db.Categories.Remove(category);
-                    }*/
 
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник категории*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id категории*/
                     var id = new DataGridCellInfo(categoryGrid.SelectedItems[i], categoryGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2555,11 +2434,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Categories category = db.Categories.FirstOrDefault(c => c.IdCategory == j);
                             if (category != null)
                             {
@@ -2593,7 +2472,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < shopsGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник магазина*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id магазина*/
                     var id = new DataGridCellInfo(shopsGrid.SelectedItems[i], shopsGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2601,11 +2480,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Shops shop = db.Shops.FirstOrDefault(c => c.IdShop == j);
                             if (shop != null)
                             {
@@ -2637,7 +2516,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < stagesGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник этапа*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id этапа*/
                     var id = new DataGridCellInfo(stagesGrid.SelectedItems[i], stagesGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2645,11 +2524,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Stages stage = db.Stages.FirstOrDefault(c => c.IdStage == j);
                             if (stage != null)
                             {
@@ -2681,7 +2560,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < sizesGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник размера*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id размера*/
                     var id = new DataGridCellInfo(sizesGrid.SelectedItems[i], sizesGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2689,11 +2568,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Sizes size = db.Sizes.FirstOrDefault(c => c.IdSize == j);
                             if (size != null)
                             {
@@ -2725,7 +2604,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < modGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник модификации*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id модификации*/
                     var id = new DataGridCellInfo(modGrid.SelectedItems[i], modGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2733,11 +2612,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Modifications mod = db.Modifications.FirstOrDefault(c => c.IdModification == j);
                             if (mod != null)
                             {
@@ -2771,7 +2650,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < paintGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник покраски*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id покраски*/
                     var id = new DataGridCellInfo(paintGrid.SelectedItems[i], paintGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2779,7 +2658,7 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
@@ -2790,7 +2669,7 @@ namespace Craft
                                 db.Paintcolors.Remove(c);
                             }
 
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Painting paint = db.Painting.FirstOrDefault(c => c.IdPainting == j);
                             if (paint != null)
                             {
@@ -2880,7 +2759,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < colorGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник цвета*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id цвета*/
                     var id = new DataGridCellInfo(colorGrid.SelectedItems[i], colorGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2888,11 +2767,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Colors color = db.Colors.FirstOrDefault(c => c.IdColor == j);
                             if (color != null)
                             {
@@ -2924,7 +2803,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < productphotoGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник фотографии*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id фотографии*/
                     var id = new DataGridCellInfo(productphotoGrid.SelectedItems[i], productphotoGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2932,11 +2811,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Photos photo = db.Photos.FirstOrDefault(c => c.IdProductphoto == j);
                             if (photo != null)
                             {
@@ -2968,7 +2847,7 @@ namespace Craft
                 /*пока в таблице есть данные*/
                 for (int i = 0; i < dispatchGrid.SelectedItems.Count; i++)
                 {
-                    /*считываем первый столбец выбранной строки, в этом случае это айдишник отправки*/
+                    /*считываем первый столбец выбранной строки, в этом случае это id отправки*/
                     var id = new DataGridCellInfo(dispatchGrid.SelectedItems[i], dispatchGrid.Columns[0]);
                     /*делаем эту штуку текстом*/
                     var content = id.Column.GetCellContent(id.Item) as TextBlock;
@@ -2976,11 +2855,11 @@ namespace Craft
                     int j;
                     if (content != null)
                     {
-                        /*если в ячейке только числа, получим это число в переменную джей - это и есть нужный айди*/
+                        /*если в ячейке только числа, получим это число в переменную j - это и есть нужный id*/
                         bool success = int.TryParse(content.Text.Trim(), out j);
                         if (success)
                         {
-                            /*находим нужный объект по айди и удаляем*/
+                            /*находим нужный объект по id и удаляем*/
                             Dispatch dispatch = db.Dispatch.FirstOrDefault(c => c.IdDispatch == j);
                             if (dispatch != null)
                             {

@@ -1,5 +1,5 @@
 # diplom
 desktop app for crafterfold workshop
 
-Файл разметки интерфейса - MainWindow.xaml 
-Файл связанного с разметкой кода - MainWindow.xaml.cs
+<p>Файл разметки интерфейса - MainWindow.xaml </p>
+<p>Файл связанного с разметкой кода - MainWindow.xaml.cs</p>
